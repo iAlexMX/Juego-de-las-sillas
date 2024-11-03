@@ -1,0 +1,119 @@
+-- Variables
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local workspace = game.Workspace
+local chairsFolder = workspace:WaitForChild("Chairs")
+local ui = Instance.new("ScreenGui", player.PlayerGui)
+local teleportButton = Instance.new("TextButton", ui)
+local walkButton = Instance.new("TextButton", ui)
+
+-- Configuración de la interfaz
+ui.Name = "TeleportAndWalkUI"
+ui.ResetOnSpawn = false
+
+teleportButton.Size = UDim2.new(0, 200, 0, 50)
+teleportButton.Position = UDim2.new(0.5, -100, 0.5, -60)
+teleportButton.Text = "Teletransportarse a Silla"
+teleportButton.BackgroundColor3 = Color3.new(0, 1, 0)
+
+walkButton.Size = UDim2.new(0, 200, 0, 50)
+walkButton.Position = UDim2.new(0.5, -100, 0.5, 10)
+walkButton.Text = "Caminar hacia Silla"
+walkButton.BackgroundColor3 = Color3.new(0, 0, 1)
+
+-- Función para encontrar la silla más cercana
+local function getNearestChair()
+    local nearestChair = nil
+    local shortestDistance = math.huge
+    
+    for _, chair in ipairs(chairsFolder:GetChildren()) do
+        if chair:IsA("Model") and chair:FindFirstChild("Seat") then
+            local seat = chair.Seat
+            local distance = (character.HumanoidRootPart.Position - seat.Position).magnitude
+            
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestChair = seat
+            end
+        end
+    end
+    
+    return nearestChair
+end
+
+-- Teletransportarse a la silla
+local teleportActive = false
+local teleportConnection
+
+local function teleportToChair()
+    teleportConnection = game:GetService("RunService").Stepped:Connect(function()
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local chair = getNearestChair()
+            if chair then
+                character:SetPrimaryPartCFrame(chair.CFrame)
+            end
+        end
+    end)
+end
+
+-- Caminar hacia la silla
+local walkActive = false
+local walkConnection
+
+local function walkToChair()
+    walkConnection = game:GetService("RunService").Stepped:Connect(function()
+        if character and character:FindFirstChildOfClass("Humanoid") then
+            local chair = getNearestChair()
+            if chair then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                humanoid.WalkSpeed = 20
+                humanoid:MoveTo(chair.Position)
+                humanoid.MoveToFinished:Wait()
+                humanoid.WalkSpeed = 16 -- Regresar a la velocidad normal
+            end
+        end
+    end)
+end
+
+-- Conectar botones a las funciones
+teleportButton.MouseButton1Click:Connect(function()
+    teleportActive = not teleportActive
+    if teleportActive then
+        teleportButton.BackgroundColor3 = Color3.new(1, 0, 0) -- Cambiar color al activarse
+        teleportToChair() -- Ejecutar función
+    else
+        teleportButton.BackgroundColor3 = Color3.new(0, 1, 0) -- Volver a color original
+        if teleportConnection then
+            teleportConnection:Disconnect() -- Detener la conexión
+            teleportConnection = nil
+        end
+    end
+end)
+
+walkButton.MouseButton1Click:Connect(function()
+    walkActive = not walkActive
+    if walkActive then
+        walkButton.BackgroundColor3 = Color3.new(1, 0, 0) -- Cambiar color al activarse
+        walkToChair() -- Ejecutar función
+    else
+        walkButton.BackgroundColor3 = Color3.new(0, 0, 1) -- Volver a color original
+        if walkConnection then
+            walkConnection:Disconnect() -- Detener la conexión
+            walkConnection = nil
+        end
+    end
+end)
+
+-- Para dispositivos móviles
+teleportButton.TouchTap:Connect(function()
+    teleportButton.MouseButton1Click:Fire()
+end)
+
+walkButton.TouchTap:Connect(function()
+    walkButton.MouseButton1Click:Fire()
+end)
+
+-- Asegurarse de reiniciar los scripts si el personaje cambia
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+end)
