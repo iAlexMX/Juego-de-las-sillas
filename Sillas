@@ -4,22 +4,51 @@ local character = player.Character or player.CharacterAdded:Wait()
 local workspace = game.Workspace
 local chairsFolder = workspace:WaitForChild("Chairs")
 local ui = Instance.new("ScreenGui", player.PlayerGui)
-local teleportButton = Instance.new("TextButton", ui)
-local walkButton = Instance.new("TextButton", ui)
 
--- Configuración de la interfaz
-ui.Name = "TeleportAndWalkUI"
-ui.ResetOnSpawn = false
+-- Crear un marco para los botones
+local frame = Instance.new("Frame", ui)
+frame.Size = UDim2.new(0, 220, 0, 150)
+frame.Position = UDim2.new(0.5, -110, 0.5, -75)
+frame.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5) -- Color gris
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
-teleportButton.Size = UDim2.new(0, 200, 0, 50)
-teleportButton.Position = UDim2.new(0.5, -100, 0.5, -60)
+-- Crear los botones
+local teleportButton = Instance.new("TextButton", frame)
+teleportButton.Size = UDim2.new(1, 0, 0, 50)
+teleportButton.Position = UDim2.new(0, 0, 0, 10)
 teleportButton.Text = "Teletransportarse a Silla"
 teleportButton.BackgroundColor3 = Color3.new(0, 1, 0)
 
-walkButton.Size = UDim2.new(0, 200, 0, 50)
-walkButton.Position = UDim2.new(0.5, -100, 0.5, 10)
+local walkButton = Instance.new("TextButton", frame)
+walkButton.Size = UDim2.new(1, 0, 0, 50)
+walkButton.Position = UDim2.new(0, 0, 0, 70)
 walkButton.Text = "Caminar hacia Silla"
 walkButton.BackgroundColor3 = Color3.new(0, 0, 1)
+
+-- Crear botón de minimizar dentro del marco
+local minimizeButton = Instance.new("TextButton", frame)
+minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+minimizeButton.Position = UDim2.new(0, 180, 0, 5)
+minimizeButton.Text = "-"
+minimizeButton.BackgroundColor3 = Color3.new(1, 0, 0)
+
+-- Crear botón de maximizar que se moverá
+local maximizeButton = Instance.new("TextButton", ui)
+maximizeButton.Size = UDim2.new(0, 100, 0, 50)
+maximizeButton.Position = UDim2.new(0.5, -50, 0.5, -25) -- Centrado en la pantalla
+maximizeButton.Text = "Maximizar"
+maximizeButton.BackgroundColor3 = Color3.new(0, 1, 0)
+maximizeButton.Visible = false
+
+-- Crear etiqueta de créditos
+local creditsLabel = Instance.new("TextLabel", frame)
+creditsLabel.Size = UDim2.new(1, 0, 0, 30)
+creditsLabel.Position = UDim2.new(0, 0, 1, -30) -- En la parte inferior del marco
+creditsLabel.Text = "Créditos a iAlexMX"
+creditsLabel.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
+creditsLabel.TextColor3 = Color3.new(1, 1, 1) -- Color blanco
+creditsLabel.TextScaled = true
+creditsLabel.TextStrokeTransparency = 0.5
 
 -- Función para encontrar la silla más cercana
 local function getNearestChair()
@@ -29,11 +58,15 @@ local function getNearestChair()
     for _, chair in ipairs(chairsFolder:GetChildren()) do
         if chair:IsA("Model") and chair:FindFirstChild("Seat") then
             local seat = chair.Seat
-            local distance = (character.HumanoidRootPart.Position - seat.Position).magnitude
-            
-            if distance < shortestDistance then
-                shortestDistance = distance
-                nearestChair = seat
+
+            -- Verificar si la silla está ocupada
+            if not seat.Occupant then
+                local distance = (character.HumanoidRootPart.Position - seat.Position).magnitude
+                
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    nearestChair = seat
+                end
             end
         end
     end
@@ -75,6 +108,54 @@ local function walkToChair()
     end)
 end
 
+-- Manejar el arrastre del marco
+local function makeDraggable(frame)
+    local dragToggle = false
+    local dragStart = nil
+    local startPos = nil
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragToggle = true
+            dragStart = input.Position
+            startPos = frame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragToggle = false
+                end
+            end)
+        end
+    end)
+
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            if dragToggle then
+                local delta = input.Position - dragStart
+                frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end
+    end)
+end
+
+-- Hacer que el marco y el botón de maximizar sean arrastrables
+makeDraggable(frame)
+
+-- Minimizar la interfaz
+minimizeButton.MouseButton1Click:Connect(function()
+    frame.Visible = false
+    maximizeButton.Visible = true
+end)
+
+-- Maximizar la interfaz
+maximizeButton.MouseButton1Click:Connect(function()
+    frame.Visible = true
+    maximizeButton.Visible = false
+end)
+
+-- Hacer que el botón de maximizar sea arrastrable
+makeDraggable(maximizeButton)
+
 -- Conectar botones a las funciones
 teleportButton.MouseButton1Click:Connect(function()
     teleportActive = not teleportActive
@@ -105,6 +186,14 @@ walkButton.MouseButton1Click:Connect(function()
 end)
 
 -- Para dispositivos móviles
+minimizeButton.TouchTap:Connect(function()
+    minimizeButton.MouseButton1Click:Fire()
+end)
+
+maximizeButton.TouchTap:Connect(function()
+    maximizeButton.MouseButton1Click:Fire()
+end)
+
 teleportButton.TouchTap:Connect(function()
     teleportButton.MouseButton1Click:Fire()
 end)
@@ -117,3 +206,6 @@ end)
 player.CharacterAdded:Connect(function(newCharacter)
     character = newCharacter
 end)
+
+-- Hacer que el marco sea arrastrable
+makeDraggable(frame)
