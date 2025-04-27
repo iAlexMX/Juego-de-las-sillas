@@ -1,18 +1,15 @@
--- Variables
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local workspace = game.Workspace
 local chairsFolder = workspace:WaitForChild("Chairs")
 local ui = Instance.new("ScreenGui", player.PlayerGui)
 
--- Crear un marco para los botones
 local frame = Instance.new("Frame", ui)
 frame.Size = UDim2.new(0, 220, 0, 200)
 frame.Position = UDim2.new(0.5, -110, 0.5, -100)
-frame.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5) -- Color gris
+frame.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
--- Crear los botones
 local teleportButton = Instance.new("TextButton", frame)
 teleportButton.Size = UDim2.new(1, 0, 0, 50)
 teleportButton.Position = UDim2.new(0, 0, 0, 10)
@@ -31,14 +28,12 @@ killGuiButton.Position = UDim2.new(0, 0, 0, 130)
 killGuiButton.Text = "Kill GUI"
 killGuiButton.BackgroundColor3 = Color3.new(1, 0, 0)
 
--- Crear botón de minimizar
 local minimizeButton = Instance.new("TextButton", frame)
 minimizeButton.Size = UDim2.new(0, 30, 0, 30)
 minimizeButton.Position = UDim2.new(0, 180, 0, 5)
 minimizeButton.Text = "-"
 minimizeButton.BackgroundColor3 = Color3.new(1, 0, 0)
 
--- Crear botón de maximizar
 local maximizeButton = Instance.new("TextButton", ui)
 maximizeButton.Size = UDim2.new(0, 100, 0, 50)
 maximizeButton.Position = UDim2.new(0.5, -50, 0.5, -25)
@@ -46,17 +41,15 @@ maximizeButton.Text = "Maximizar"
 maximizeButton.BackgroundColor3 = Color3.new(0, 1, 0)
 maximizeButton.Visible = false
 
--- Crear etiqueta de créditos
 local creditsLabel = Instance.new("TextLabel", frame)
 creditsLabel.Size = UDim2.new(1, 0, 0, 30)
 creditsLabel.Position = UDim2.new(0, 0, 1, -30)
 creditsLabel.Text = "Créditos a iAlexMX"
 creditsLabel.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
-creditsLabel.TextColor3 = Color3.new(1, 1, 1) -- Color blanco
+creditsLabel.TextColor3 = Color3.new(1, 1, 1)
 creditsLabel.TextScaled = true
 creditsLabel.TextStrokeTransparency = 0.5
 
--- Función para encontrar la silla más cercana
 local function getNearestChair()
     local nearestChair = nil
     local shortestDistance = math.huge
@@ -65,7 +58,6 @@ local function getNearestChair()
         if chair:IsA("Model") and chair:FindFirstChild("Seat") then
             local seat = chair.Seat
             
-            -- Verificar si la silla está ocupada
             if not seat.Occupant then
                 local distance = (character.HumanoidRootPart.Position - seat.Position).magnitude
                 
@@ -80,7 +72,6 @@ local function getNearestChair()
     return nearestChair
 end
 
--- Teletransportarse a la silla
 local teleportActive = false
 local teleportConnection
 
@@ -89,9 +80,9 @@ local function teleportToChair()
         if character and character:FindFirstChild("HumanoidRootPart") then
             local chair = getNearestChair()
             if chair then
-                -- Verificar si la silla está arriba del jugador
+
                 if chair.Position.Y > character.HumanoidRootPart.Position.Y + 5 then
-                    character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) -- Saltar
+                    character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
                 end
                 character:SetPrimaryPartCFrame(chair.CFrame)
             end
@@ -99,7 +90,6 @@ local function teleportToChair()
     end)
 end
 
--- Caminar hacia la silla
 local walkActive = false
 local walkConnection
 
@@ -112,13 +102,12 @@ local function walkToChair()
                 humanoid.WalkSpeed = 20
                 humanoid:MoveTo(chair.Position)
                 humanoid.MoveToFinished:Wait()
-                humanoid.WalkSpeed = 16 -- Regresar a la velocidad normal
+                humanoid.WalkSpeed = 16
             end
         end
     end)
 end
 
--- Manejar el arrastre del marco
 local function makeDraggable(frame)
     local dragToggle = false
     local dragStart = nil
@@ -148,34 +137,29 @@ local function makeDraggable(frame)
     end)
 end
 
--- Hacer que el marco y el botón de maximizar sean arrastrables
 makeDraggable(frame)
 
--- Minimizar la interfaz
 minimizeButton.MouseButton1Click:Connect(function()
     frame.Visible = false
     maximizeButton.Visible = true
 end)
 
--- Maximizar la interfaz
 maximizeButton.MouseButton1Click:Connect(function()
     frame.Visible = true
     maximizeButton.Visible = false
 end)
 
--- Hacer que el botón de maximizar sea arrastrable
 makeDraggable(maximizeButton)
 
--- Conectar botones a las funciones
 teleportButton.MouseButton1Click:Connect(function()
     teleportActive = not teleportActive
     if teleportActive then
-        teleportButton.BackgroundColor3 = Color3.new(1, 0, 0) -- Cambiar color al activarse
-        teleportToChair() -- Ejecutar función
+        teleportButton.BackgroundColor3 = Color3.new(1, 0, 0)
+        teleportToChair()
     else
-        teleportButton.BackgroundColor3 = Color3.new(0, 1, 0) -- Volver a color original
+        teleportButton.BackgroundColor3 = Color3.new(0, 1, 0)
         if teleportConnection then
-            teleportConnection:Disconnect() -- Detener la conexión
+            teleportConnection:Disconnect()
             teleportConnection = nil
         end
     end
@@ -184,24 +168,23 @@ end)
 walkButton.MouseButton1Click:Connect(function()
     walkActive = not walkActive
     if walkActive then
-        walkButton.BackgroundColor3 = Color3.new(1, 0, 0) -- Cambiar color al activarse
-        walkToChair() -- Ejecutar función
+        walkButton.BackgroundColor3 = Color3.new(1, 0, 0)
+        walkToChair()
     else
-        walkButton.BackgroundColor3 = Color3.new(0, 0, 1) -- Volver a color original
+        walkButton.BackgroundColor3 = Color3.new(0, 0, 1)
         if walkConnection then
-            walkConnection:Disconnect() -- Detener la conexión
+            walkConnection:Disconnect()
             walkConnection = nil
         end
     end
 end)
 
 killGuiButton.MouseButton1Click:Connect(function()
-    ui:Destroy() -- Eliminar la interfaz
-    if teleportConnection then teleportConnection:Disconnect() end -- Desconectar el teleport
-    if walkConnection then walkConnection:Disconnect() end -- Desconectar el walk
+    ui:Destroy()
+    if teleportConnection then teleportConnection:Disconnect() end
+    if walkConnection then walkConnection:Disconnect() end
 end)
 
--- Para dispositivos móviles
 minimizeButton.TouchTap:Connect(function()
     minimizeButton.MouseButton1Click:Fire()
 end)
@@ -222,10 +205,8 @@ killGuiButton.TouchTap:Connect(function()
     killGuiButton.MouseButton1Click:Fire()
 end)
 
--- Asegurarse de reiniciar los scripts si el personaje cambia
 player.CharacterAdded:Connect(function(newCharacter)
     character = newCharacter
 end)
 
--- Hacer que el marco sea arrastrable
 makeDraggable(frame)
