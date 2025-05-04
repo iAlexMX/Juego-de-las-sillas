@@ -1,4 +1,4 @@
-# 🪑 Juego de las sillas – Teletransportación Inteligente en Roblox **(JUEGO ELIMINADO)**
+# 🪑 Sillas Musicales – Teletransportación Inteligente en Roblox **(JUEGO ELIMINADO)**
 
 Este script añade una GUI funcional para ayudarte a **encontrar, caminar o teletransportarte** automáticamente a la **silla libre más cercana** dentro de tu entorno en Roblox. Cuenta con botones interactivos, soporte táctil y modo draggable para comodidad total.
 
@@ -38,7 +38,7 @@ Este script añade una GUI funcional para ayudarte a **encontrar, caminar o tele
 
 ## 📎 Instrucciones de Uso
 
-1. Ejecuta el script dentro del juego de las sillas.
+1. Ejecuta el script dentro del juego Sillas Musicales.
 2. Aparecerá una GUI flotante con botones de control.
 3. Pulsa “Teletransportarse a Silla” o “Caminar hacia Silla” según prefieras.
 4. Usa "Kill GUI" para cerrar y detener completamente el script.
