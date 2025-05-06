@@ -2,7 +2,7 @@
 
 Este script añade una GUI funcional para ayudarte a **encontrar, caminar o teletransportarte** automáticamente a la **silla libre más cercana** dentro de tu entorno en Roblox. Cuenta con botones interactivos, soporte táctil y modo draggable para comodidad total.
 
-<pre>loadstring(game:HttpGet("https://raw.githubusercontent.com/iAlexMX/Juego-de-las-sillas/refs/heads/main/Sillas%20by%20iAlexMX.lua"))()</pre>
+<pre>loadstring(game:HttpGet("https://raw.githubusercontent.com/iAlexMX/Juego-de-las-sillas/refs/heads/main/Sillas%20by%20AlexScriptX.lua"))()</pre>
 
 ---
 
